@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>EduGenie - AI Learning Assistant</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Welcome to EduGenie 🧠✨</h1>
+
+    <p class="subtitle">
+        Your personal AI tutor for learning support!
+    </p>
+
+
+    <!-- Q&A -->
+
+    <form id="qaForm">
+
+        <label>
+            <strong>Ask EduGenie a Question:</strong>
+        </label>
+
+        <input
+            type="text"
+            id="question"
+            placeholder="Why is the sky blue?"
+            required
+        >
+
+        <button type="submit">
+            Ask
+        </button>
+
+    </form>
+
+    <div id="qaResult" class="output"></div>
+
+
+    <!-- Explanation -->
+
+    <form id="explainForm">
+
+        <label>
+            <strong>Need an Explanation?</strong>
+        </label>
+
+        <input
+            type="text"
+            id="topic"
+            placeholder="Photosynthesis"
+            required
+        >
+
+        <button type="submit">
+            Explain
+        </button>
+
+    </form>
+
+    <div id="explanationResult" class="output"></div>
+
+
+    <!-- Summary -->
+
+    <form id="summaryForm">
+
+        <label>
+            <strong>Summarize a Paragraph:</strong>
+        </label>
+
+        <textarea
+            id="summaryText"
+            placeholder="Paste long content to summarize"
+            required
+        ></textarea>
+
+        <button type="submit">
+            Summarize
+        </button>
+
+    </form>
+
+    <div id="summaryResult" class="output"></div>
+
+
+    <!-- Quiz -->
+
+    <form id="quizForm">
+
+        <label>
+            <strong>Generate a Quiz:</strong>
+        </label>
+
+        <textarea
+            id="quizText"
+            placeholder="Enter a topic or passage"
+            required
+        ></textarea>
+
+        <button type="submit">
+            Generate Quiz
+        </button>
+
+    </form>
+
+    <div id="quizResult" class="output"></div>
+
+
+    <!-- Learning Path -->
+
+    <form id="learningForm">
+
+        <label>
+            <strong>Learning Recommendations:</strong>
+        </label>
+
+        <input
+            type="text"
+            id="learningTopic"
+            placeholder="Python Programming"
+            required
+        >
+
+        <button type="submit">
+            Recommend Path
+        </button>
+
+    </form>
+
+    <div id="learningResult" class="output"></div>
+
+</div>
+
+
+<script>
+
+    // =========================
+    // Q&A
+    // =========================
+
+    document
+        .getElementById("qaForm")
+        .addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const question =
+                document.getElementById("question").value;
+
+            const result =
+                document.getElementById("qaResult");
+
+            result.textContent = "Thinking...";
+
+            try {
+
+                const response = await fetch(
+                    `/qa?question=${encodeURIComponent(question)}`
+                );
+
+                const data = await response.json();
+
+                result.textContent =
+                    data.answer || data.error;
+
+            } catch (error) {
+
+                result.textContent =
+                    "Error connecting to server.";
+
+            }
+
+        });
+
+
+    // =========================
+    // Explanation
+    // =========================
+
+    document
+        .getElementById("explainForm")
+        .addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const topic =
+                document.getElementById("topic").value;
+
+            const result =
+                document.getElementById("explanationResult");
+
+            result.textContent =
+                "Generating explanation...";
+
+            try {
+
+                const response = await fetch(
+                    "/explain",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            topic: topic
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                result.textContent =
+                    data.explanation || data.error;
+
+            } catch (error) {
+
+                result.textContent =
+                    "Error connecting to server.";
+
+            }
+
+        });
+
+
+    // =========================
+    // Summary
+    // =========================
+
+    document
+        .getElementById("summaryForm")
+        .addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const text =
+                document.getElementById("summaryText").value;
+
+            const result =
+                document.getElementById("summaryResult");
+
+            result.textContent = "Summarizing...";
+
+            try {
+
+                const response = await fetch(
+                    "/summarize",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            text: text
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                result.textContent =
+                    data.summary || data.error;
+
+            } catch (error) {
+
+                result.textContent =
+                    "Error connecting to server.";
+
+            }
+
+        });
+
+
+    // =========================
+    // Quiz
+    // =========================
+
+    document
+        .getElementById("quizForm")
+        .addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const text =
+                document.getElementById("quizText").value;
+
+            const result =
+                document.getElementById("quizResult");
+
+            result.textContent =
+                "Generating quiz...";
+
+            try {
+
+                const response = await fetch(
+                    "/quiz",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            text: text
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (data.quiz) {
+
+                    // Check if backend returned an error
+                    if (
+                        data.quiz[0] &&
+                        data.quiz[0].error
+                    ) {
+
+                        result.textContent =
+                            data.quiz[0].error;
+
+                        return;
+                    }
+
+                    // Clear old quiz
+                    result.innerHTML = "";
+
+                    // Create each question
+                    data.quiz.forEach(function(item, index) {
+
+                        const questionBox =
+                            document.createElement("div");
+
+                        questionBox.className =
+                            "quiz-question";
+
+                        const title =
+                            document.createElement("h3");
+
+                        title.textContent =
+                            `Question ${index + 1}: ${item.question}`;
+
+                        questionBox.appendChild(title);
+
+
+                        // Create options
+                        item.options.forEach(
+                            function(option, optionIndex) {
+
+                                const optionButton =
+                                    document.createElement("button");
+
+                                optionButton.type =
+                                    "button";
+
+                                optionButton.className =
+                                    "quiz-option";
+
+                                optionButton.textContent =
+                                    `${String.fromCharCode(65 + optionIndex)}. ${option}`;
+
+
+                                optionButton.onclick =
+                                    function() {
+
+                                        // Remove previous result
+                                        optionButton.classList.remove(
+                                            "correct",
+                                            "wrong"
+                                        );
+
+                                        if (
+                                            option === item.answer
+                                        ) {
+
+                                            optionButton.classList.add(
+                                                "correct"
+                                            );
+
+                                        } else {
+
+                                            optionButton.classList.add(
+                                                "wrong"
+                                            );
+
+                                        }
+
+                                    };
+
+                                questionBox.appendChild(
+                                    optionButton
+                                );
+
+                            }
+                        );
+
+                        result.appendChild(
+                            questionBox
+                        );
+
+                    });
+
+                } else {
+
+                    result.textContent =
+                        data.error ||
+                        "Unable to generate quiz.";
+
+                }
+
+            } catch (error) {
+
+                result.textContent =
+                    "Error connecting to server.";
+
+            }
+
+        });
+
+
+    // =========================
+    // Learning Path
+    // =========================
+
+    document
+        .getElementById("learningForm")
+        .addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const topic =
+                document.getElementById("learningTopic").value;
+
+            const result =
+                document.getElementById("learningResult");
+
+            result.textContent =
+                "Creating learning path...";
+
+            try {
+
+                const response = await fetch(
+                    `/learn/recommendations?topic=${encodeURIComponent(topic)}`
+                );
+
+                const data = await response.json();
+
+                result.textContent =
+                    data.recommendation || data.error;
+
+            } catch (error) {
+
+                result.textContent =
+                    "Error connecting to server.";
+
+            }
+
+        });
+
+</script>
+
+</body>
+</html>
